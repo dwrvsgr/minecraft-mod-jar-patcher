@@ -35,8 +35,17 @@ class ProjectEPatcher(JarPatcher):
         default_emc_path = './data/projecte/pe_custom_conversions/defaults.json'
         emc_data = self.read_json(default_emc_path)
 
+        """ 原版物品 """
+        emc_data['values']['before']['#forge:gems/emerald'] = 160  # 绿宝石
+        emc_data['values']['before']['minecraft:gilded_blackstone'] = 48  # 镶金黑石
+        emc_data['values']['before']['minecraft:wither_skeleton_skull'] = 10240  # 凋零骷髅头
+        emc_data['values']['before']['minecraft:dragon_head'] = 32768  # 龙首
+        emc_data['values']['before']['minecraft:elytra'] = 65536  # 鞘翅
+        emc_data['values']['before']['minecraft:totem_of_undying'] = 8192  # 不死图腾
+        emc_data['values']['before']['minecraft:experience_bottle'] = 512  # 附魔之瓶
+
         """ 农夫乐事模组 """
-        # 原子物品（你已给出）
+        # 原子物品
         emc_data['values']['before']['farmersdelight:canvas'] = 48  # 粗布（Canvas）
         emc_data['values']['before']['farmersdelight:cabbage'] = 64  # 卷心菜（Cabbage）
         emc_data['values']['before']['farmersdelight:tomato'] = 64  # 番茄（Tomato）
@@ -97,8 +106,6 @@ class ProjectEPatcher(JarPatcher):
         emc_data['values']['before']['farmersdelight:shepherds_pie'] = 119  # 盘装牧羊人派（Plate of Shepherd's Pie）
         emc_data['values']['before']['farmersdelight:dog_food'] = 104  # 狗粮（Dog Food）
         emc_data['values']['before']['farmersdelight:honey_glazed_ham'] = 71  # 盘装蜜汁火腿（Plate of Honey Glazed Ham）
-
-
 
 
         self.write_json(default_emc_path, emc_data)
