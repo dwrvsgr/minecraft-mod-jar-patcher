@@ -94,4 +94,6 @@ class JarPatcher(ABC):
                 p.unlink()
 
     def remove_dir(self, rel: PathLike) -> None:
-        shutil.rmtree(self.work_dir / rel)
+        p = self.work_dir / rel
+        if p.exists():
+            shutil.rmtree(self.work_dir / rel)
