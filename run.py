@@ -7,22 +7,18 @@ class Args(BaseSettings):
     model_config = SettingsConfigDict(
         cli_prog_name="Minecraft Mod Patcher",
         cli_parse_args=True,
-        cli_kebab_case=True,
-        cli_implicit_flags=True,
         extra='forbid'
     )
 
     jar_path: str = Field(
         description="MOD文件路径",
-        default="~/Downloads/ProjectE-1.20.1-PE1.0.1.jar"
     )
-    output_path: str = Field(
-        description="修改后的MOD文件的输出目录",
-        default="~/Desktop"
+    output_path: str | None = Field(
+        description="修改后的MOD文件的输出目录，如果不提供则覆盖原文件",
+        default=None
     )
     mod_name: str = Field(
-        description="模组名称",
-        default="projecte"
+        description="模组名称（目前仅支持projecte，immersive_aircraft）",
     )
     validate_jar: bool = Field(
         default=True,
