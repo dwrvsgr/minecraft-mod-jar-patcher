@@ -12,13 +12,34 @@ PathLike = Union[str, Path]
 class JarPatcher(ABC):
     def __init__(
         self,
+        mod_name: str,
         jar_path: PathLike,
         output_path: PathLike | None = None,
+        validate_jar: bool = True,
     ) -> None:
+        """
+        Args:
+
+        mod_name (str):
+        模组名（通常是modid）
+
+        jar_path (PathLike):
+        需要被修改的 JAR 文件路径。可为 str 或 pathlib.Path。会被展开为绝对路径并用于计算工作目录。
+
+        output_path (PathLike | None, optional):
+        输出目录（文件夹）路径。若为 None，则在原始 JAR 上就地覆盖；
+        若提供目录，则在该目录下以源文件同名生成新的 JAR（不会改动源文件）。默认 None。
+
+        validate_jar (bool, optional):
+        是否在执行补丁前进行原始文件 MD5 校验。为 True 时，会读取当前模块目录下的 md5.json，
+        以类名作为键比对目标 JAR 的 MD5；不匹配将抛出断言错误。默认 True。
+        """
+        self.mod_name = mod_name
         self.jar_path = Path(jar_path).expanduser().resolve()
         self.code = hashlib.sha256(str(self.jar_path).encode()).hexdigest()[:16]
         self.work_dir = Path.home() / ".cache" / self.code
         self.output_path = Path(output_path).expanduser().resolve() / self.jar_path.name if output_path else self.jar_path
+        self.validate_jar = validate_jar
 
     @abstractmethod
     def run(self) -> None:
@@ -26,8 +47,15 @@ class JarPatcher(ABC):
         raise NotImplementedError
 
     def apply(self) -> Path:
+        from meta import META
+
         if not self.jar_path.exists():
             raise FileNotFoundError(self.jar_path)
+        if self.jar_path.stem not in META[self.mod_name]['files'] or self.jar_path.suffix != '.jar':
+            raise ValueError("文件格式不符合规范")
+        
+        if self.validate_jar:
+            assert META[self.mod_name]['files'][self.jar_path.stem] == self.md5(), "MD5校验失败！"
 
         # 1) 准备工作目录
         if self.work_dir.exists():
@@ -97,3 +125,7 @@ class JarPatcher(ABC):
         p = self.work_dir / rel
         if p.exists():
             shutil.rmtree(self.work_dir / rel)
+
+    def md5(self):
+        with open(self.jar_path, "rb") as f:
+            return hashlib.file_digest(f, hashlib.md5).hexdigest()
