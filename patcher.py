@@ -92,9 +92,9 @@ class JarPatcher(ABC):
             data = json.load(f)
         return data
     
-    def write_json(self, rel: PathLike, data, encoding:str = 'utf-8'):
+    def write_json(self, rel: PathLike, data, encoding:str = 'utf-8', ensure_ascii=False):
         with open(self.work_dir / rel, "w", encoding=encoding) as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
+            json.dump(data, f, ensure_ascii=ensure_ascii, indent=2)
 
     def remove_file(
         self,
