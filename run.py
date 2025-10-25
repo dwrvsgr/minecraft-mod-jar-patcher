@@ -9,14 +9,13 @@ class Args(BaseSettings):
         cli_parse_args=True,
         extra='forbid'
     )
-
     jar_path: str = Field(
         default='~/Downloads/ProjectE-1.20.1-PE1.0.1.jar',
         description="MOD文件路径",
     )
     output_path: str | None = Field(
         description="修改后的MOD文件的输出目录，如果不提供则覆盖原文件",
-        default='~/Desktop'
+        default='~/Desktop',
     )
     mod_name: str = Field(
         default='projecte',

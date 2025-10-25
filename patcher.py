@@ -87,14 +87,14 @@ class JarPatcher(ABC):
         # 5) 删除工作目录
         shutil.rmtree(self.work_dir)
 
-    def read_json(self, rel: PathLike, encoding:str = 'utf-8'):
+    def read_json(self, rel: PathLike, encoding: str = 'utf-8'):
         with open(self.work_dir / rel, "r", encoding=encoding) as f:
             data = json.load(f)
         return data
     
-    def write_json(self, rel: PathLike, data, encoding:str = 'utf-8', ensure_ascii=False):
+    def write_json(self, rel: PathLike, data, encoding: str = 'utf-8'):
         with open(self.work_dir / rel, "w", encoding=encoding) as f:
-            json.dump(data, f, ensure_ascii=ensure_ascii, indent=2)
+            json.dump(data, f, indent=2)
 
     def remove_file(
         self,
