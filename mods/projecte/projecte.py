@@ -3,6 +3,7 @@ import json5
 from pathlib import Path
 import json
 from mods.projecte.ttp import TransmutationTabletPainter
+import shutil
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -104,3 +105,6 @@ class ProjectEPatcher(JarPatcher):
         painter = TransmutationTabletPainter('v7', p)
         painter.paint(p)
         painter.paint(p2)
+
+        shutil.copy2(BASE_DIR / 'transmute.png', self.work_dir / './assets/projecte/textures/gui/transmute.png')
+    
