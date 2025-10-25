@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Union
+from typing import Union, Dict, List, Optional
 import zipfile
 import shutil
 import os
@@ -9,12 +9,13 @@ import json
 
 PathLike = Union[str, Path]
 
+
 class JarPatcher(ABC):
     def __init__(
         self,
         mod_name: str,
         jar_path: PathLike,
-        output_path: PathLike | None = None,
+        output_dir: PathLike | None = None,
         validate_jar: bool = True,
     ) -> None:
         """
@@ -26,7 +27,7 @@ class JarPatcher(ABC):
         jar_path (PathLike):
         需要被修改的 JAR 文件路径。可为 str 或 pathlib.Path。会被展开为绝对路径并用于计算工作目录。
 
-        output_path (PathLike | None, optional):
+        output_dir (PathLike | None, optional):
         输出目录（文件夹）路径。若为 None，则在原始 JAR 上就地覆盖；
         若提供目录，则在该目录下以源文件同名生成新的 JAR（不会改动源文件）。默认 None。
 
@@ -38,7 +39,7 @@ class JarPatcher(ABC):
         self.jar_path = Path(jar_path).expanduser().resolve()
         self.code = hashlib.sha256(str(self.jar_path).encode()).hexdigest()[:16]
         self.work_dir = Path.home() / ".cache" / self.code
-        self.output_path = Path(output_path).expanduser().resolve() / self.jar_path.name if output_path else self.jar_path
+        self.output_path = Path(output_dir).expanduser().resolve() / self.jar_path.name if output_dir else self.jar_path
         self.validate_jar = validate_jar
 
     @abstractmethod
@@ -94,7 +95,7 @@ class JarPatcher(ABC):
     
     def write_json(self, rel: PathLike, data, encoding: str = 'utf-8'):
         with open(self.work_dir / rel, "w", encoding=encoding) as f:
-            json.dump(data, f, indent=2)
+            json.dump(data, f, indent=2, ensure_ascii=False)
 
     def remove_file(
         self,
@@ -129,3 +130,72 @@ class JarPatcher(ABC):
     def md5(self):
         with open(self.jar_path, "rb") as f:
             return hashlib.file_digest(f, hashlib.md5).hexdigest()
+
+    def modify_recipe(
+        self,
+        recipe_path: str,
+        keys_to_update: Dict[str, str],
+        keys_to_remove: Optional[List[str]] = None,
+        pattern: Optional[List[str]] = None,
+    ):
+        """
+        Args:
+            recipe_path (PathLike):
+                目标 recipe.json 文件路径。可为 str 或 pathlib.Path。
+                文件将被读取并在原地写回。
+
+            keys_to_update (Dict[str, str]):
+                对应配方 "key" 字段的字符映射（如 "W"、"C" 等）。
+                映射的值必须为字符串，前后空白会被去除：
+                - 以 "#" 开头表示标签，如 "#minecraft:logs"
+                    -> 规范化为 `[{"tag": "minecraft:logs"}]`
+                - 否则视为具体物品，如 "minecraft:crossbow"
+                    -> 规范化为 `[{"item": "minecraft:crossbow"}]`
+                注：每个值都会被规范化为「只含一个元素的列表」。
+
+            keys_to_remove (List[str] | None, optional):
+                要从 recipe["key"] 中删除的字符键列表。若提供，将逐个删除。
+                默认 None（不执行删除）。
+
+            pattern (List[str] | None, optional):
+                可选的合成形状（对应 recipe 的 "pattern" 字段）。
+                若提供，将覆盖原有的 pattern。默认 None。
+        """
+        def _normalize_value(v):
+            if isinstance(v, str):
+                v = v.strip()
+                if v.startswith("#"):
+                    return [{"tag": v[1:]}]
+                return [{"item": v}]
+            else:
+                raise ValueError("keys 的值必须为字符串（形如 'minecraft:foo' 或 '#namespace:tag'）。")
+            
+        if keys_to_remove is not None and set(keys_to_remove) & set(keys_to_update.keys()):
+            raise ValueError("更新键和删除键出现冲突，请检查")
+
+        recipe_data = self.read_json(recipe_path)
+        keys_to_update = {k: _normalize_value(v) for k, v in keys_to_update.items()}
+
+        # 执行删除键
+        if keys_to_remove is not None:
+            for k in keys_to_remove:
+                if k in recipe_data['key']:
+                    del recipe_data['key'][k]
+                else:
+                    print(f"无法删除键{k}，因为它不存在")
+
+        # 执行更新和覆盖
+        recipe_data['key'].update(keys_to_update)
+
+        # 更新合成表
+        if pattern is not None:
+            recipe_data['pattern'] = pattern
+
+        # 校验
+        if set(''.join(pattern or recipe_data['pattern']).replace(' ', '')) != set(recipe_data['key'].keys()):
+            raise ValueError(
+                "合成配方存在未知键，请检查："
+                f"{recipe_path}"
+            )
+
+        self.write_json(recipe_path, recipe_data)

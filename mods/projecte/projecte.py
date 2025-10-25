@@ -28,15 +28,19 @@ class ProjectEPatcher(JarPatcher):
         self.remove_file(rel, keep=keep)
 
     def modify_recipes(self):
-        tablet_path = './data/projecte/recipes/transmutation_tablet.json'
-        tablet_data = self.read_json(tablet_path)
-        tablet_data['key']['D']['item'] = 'minecraft:netherite_block'
-        self.write_json(tablet_path, tablet_data)
+        self.modify_recipe(
+            recipe_path='./data/projecte/recipes/transmutation_tablet.json',
+            keys_to_update={
+                "D": "minecraft:netherite_block"
+            }
+        )
 
-        table_path = './data/projecte/recipes/transmutation_table.json'
-        table_data = self.read_json(table_path)
-        table_data['key']['P']['item'] = 'minecraft:diamond'
-        self.write_json(table_path, table_data)
+        self.modify_recipe(
+            recipe_path='./data/projecte/recipes/transmutation_table.json',
+            keys_to_update={
+                "P": "minecraft:diamond"
+            }
+        )
 
         self.remove_dir('./data/projecte/recipes/conversions')
 
@@ -54,7 +58,6 @@ class ProjectEPatcher(JarPatcher):
         """ 农夫乐事模组 """
         for k, v in new_emc_data['farmersdelight'].items():
             default_emc_data['values']['before'][k] = v
-
 
         self.write_json(default_emc_path, default_emc_data)
 
@@ -107,4 +110,3 @@ class ProjectEPatcher(JarPatcher):
         painter.paint(p2)
 
         shutil.copy2(BASE_DIR / 'transmute.png', self.work_dir / './assets/projecte/textures/gui/transmute.png')
-    

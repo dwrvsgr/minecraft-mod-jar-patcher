@@ -10,15 +10,15 @@ class Args(BaseSettings):
         extra='forbid'
     )
     jar_path: str = Field(
-        default='~/Downloads/ProjectE-1.20.1-PE1.0.1.jar',
+        default='~/Downloads/immersive_aircraft-1.4.0+1.20.1-forge.jar',
         description="MOD文件路径",
     )
-    output_path: str | None = Field(
+    output_dir: str | None = Field(
         description="修改后的MOD文件的输出目录，如果不提供则覆盖原文件",
         default='~/Desktop',
     )
     mod_name: str = Field(
-        default='projecte',
+        default='immersive_aircraft',
         description="模组名称（目前仅支持projecte，immersive_aircraft）",
     )
     validate_jar: bool = Field(
@@ -35,7 +35,7 @@ if __name__ == '__main__':
     patcher = META[args.mod_name]["class"](
         mod_name=args.mod_name,
         jar_path=args.jar_path,
-        output_path=args.output_path,
+        output_dir=args.output_dir,
         validate_jar=args.validate_jar
     )
     patcher.apply()
