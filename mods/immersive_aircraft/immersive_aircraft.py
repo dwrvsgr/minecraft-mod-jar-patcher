@@ -6,6 +6,7 @@ BASE_DIR = Path(__file__).resolve().parent
 class ImmersiveAircraftPatcher(JarPatcher):
     def run(self):
         self.modify_recipes()
+        self.modify_lang()
 
     def modify_recipes(self):
         # 机身
@@ -85,7 +86,7 @@ class ImmersiveAircraftPatcher(JarPatcher):
             keys_to_update={
                 "M": "minecraft:magma_block",
                 "K": "minecraft:netherite_block",
-                "L": "minecraft:elytra",
+                "L": "minecraft:ghast_tear",
             },
             keys_to_remove=['C', 'R', 'N'],
             pattern=["MKM", "BEB", "KLK"]
@@ -137,3 +138,9 @@ class ImmersiveAircraftPatcher(JarPatcher):
                 "I": "minecraft:iron_block",
             }
         )
+
+    def modify_lang(self):
+        lang_path = './assets/immersive_aircraft/lang/zh_cn.json'
+        org_keys = self.read_json(lang_path)
+        org_keys["itemGroup.immersive_aircraft.immersive_aircraft_tab"] = "沉浸式飞机（进阶版）"
+        self.write_json(lang_path, org_keys)
