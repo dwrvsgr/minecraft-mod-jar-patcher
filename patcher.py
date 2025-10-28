@@ -52,11 +52,11 @@ class JarPatcher(ABC):
 
         if not self.jar_path.exists():
             raise FileNotFoundError(self.jar_path)
-        if self.jar_path.stem not in META[self.mod_name]['files'] or self.jar_path.suffix != '.jar':
+        if self.jar_path.name not in META[self.mod_name]:
             raise ValueError("文件格式不符合规范")
         
         if self.validate_jar:
-            assert META[self.mod_name]['files'][self.jar_path.stem] == self.md5(), "MD5校验失败！"
+            assert META[self.mod_name][self.jar_path.name][0] == self.md5(), "MD5校验失败！"
 
         # 1) 准备工作目录
         if self.work_dir.exists():

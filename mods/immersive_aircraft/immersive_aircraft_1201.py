@@ -3,7 +3,8 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
 
-class ImmersiveAircraftPatcher(JarPatcher):
+
+class ImmersiveAircraftPatcher_1201(JarPatcher):
     def run(self):
         self.modify_recipes()
         self.modify_lang()

@@ -1,6 +1,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
 from meta import META
+from pathlib import Path
 
 
 class Args(BaseSettings):
@@ -9,17 +10,17 @@ class Args(BaseSettings):
         cli_parse_args=True,
         extra='forbid'
     )
+    mod_name: str = Field(
+        default='projecte',
+        description="模组名称（目前仅支持projecte，immersive_aircraft）",
+    )
     jar_path: str = Field(
-        default='~/Downloads/immersive_aircraft-1.4.0+1.20.1-forge.jar',
+        default='~/Downloads/ProjectE-1.21.1-PE1.1.0.jar',
         description="MOD文件路径",
     )
     output_dir: str | None = Field(
         description="修改后的MOD文件的输出目录，如果不提供则覆盖原文件",
         default='~/Desktop',
-    )
-    mod_name: str = Field(
-        default='immersive_aircraft',
-        description="模组名称（目前仅支持projecte，immersive_aircraft）",
     )
     validate_jar: bool = Field(
         default=True,
@@ -27,12 +28,11 @@ class Args(BaseSettings):
     )
 
 
-
 if __name__ == '__main__':
     args = Args()
     if args.mod_name not in META:
         raise ValueError("暂不支持该MOD")
-    patcher = META[args.mod_name]["class"](
+    patcher = META[args.mod_name][Path(args.jar_path).name][1](
         mod_name=args.mod_name,
         jar_path=args.jar_path,
         output_dir=args.output_dir,

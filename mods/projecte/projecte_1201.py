@@ -8,7 +8,8 @@ import shutil
 BASE_DIR = Path(__file__).resolve().parent
 
 
-class ProjectEPatcher(JarPatcher):
+class ProjectEPatcher_1201(JarPatcher):
+    """ 支持的版本：1.20.1 1.16.5 """
     def run(self):
         self.delete_recipes()
         self.delete_loot_tables()
@@ -110,3 +111,4 @@ class ProjectEPatcher(JarPatcher):
         painter.paint(p2)
 
         shutil.copy2(BASE_DIR / 'transmute.png', self.work_dir / './assets/projecte/textures/gui/transmute.png')
+
