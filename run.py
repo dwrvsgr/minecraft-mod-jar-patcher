@@ -15,7 +15,7 @@ class Args(BaseSettings):
         description="模组名称（目前仅支持projecte，immersive_aircraft）",
     )
     jar_path: str = Field(
-        default='~/Downloads/ProjectE-1.16.5-PE1.0.2.jar',
+        default='~/Downloads/ProjectE-1.21.1-PE1.1.0.jar',
         description="MOD文件路径",
     )
     output_dir: str | None = Field(
