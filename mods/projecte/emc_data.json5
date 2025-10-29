@@ -1,7 +1,7 @@
 {
   // 原版物品
   vanilla: {
-    "#forge:gems/emerald": 160, // 绿宝石（20%的交易可获利）
+    "minecraft:emerald": 160, // 绿宝石（20%的交易可获利）
     // 绿宝石的EMC不可以在这里设为0，否则会导致所有物品都失去EMC
     // 如果执意要改为0，请在custom_emc.json中修改
     "minecraft:gilded_blackstone": 48, // 镶金黑石

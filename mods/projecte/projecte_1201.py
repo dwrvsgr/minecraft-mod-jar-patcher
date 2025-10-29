@@ -9,15 +9,30 @@ BASE_DIR = Path(__file__).resolve().parent
 
 
 class ProjectEPatcher_1201(JarPatcher):
-    """ 支持的版本：1.20.1 1.16.5 """
+    """ 
+    支持的版本：1.20.1 1.19.2 1.18.2 1.16.5
+    """
     def run(self):
+        # 删除
         self.delete_recipes()
         self.delete_loot_tables()
+        self.delete_advancements()
+
+        # 修改
         self.modify_recipes()
         self.modify_emc()
         self.modify_lang()
-        self.replace_textures()
         self.modify_toml()
+
+        # 替换
+        self.replace_textures()
+
+    def delete_advancements(self):
+        rel = './data/projecte/advancements'
+        keep = ['transmutation_table.json', 'transmutation_tablet.json']
+        self.remove_file(rel, keep=keep)
+
+        self.remove_dir('./data/projecte/advancements/recipes')
 
     def delete_recipes(self):
         rel = './data/projecte/recipes'
@@ -52,6 +67,9 @@ class ProjectEPatcher_1201(JarPatcher):
 
         with open(BASE_DIR / 'emc_data.json5', 'r', encoding='utf-8') as f:
             new_emc_data = json5.load(f)
+
+        # 删除绿宝石标签
+        del default_emc_data['values']['before']['#forge:gems/emerald']
 
         """ 原版物品 """
         for k, v in new_emc_data['vanilla'].items():
