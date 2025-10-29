@@ -6,6 +6,7 @@ import shutil
 import os
 import hashlib
 import json
+import toml
 
 PathLike = Union[str, Path]
 
@@ -96,6 +97,14 @@ class JarPatcher(ABC):
     def write_json(self, rel: PathLike, data, encoding: str = 'utf-8'):
         with open(self.work_dir / rel, "w", encoding=encoding) as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
+
+    def read_toml(self, rel: PathLike):
+        data = toml.load(self.work_dir / rel)
+        return data
+    
+    def write_toml(self, rel: PathLike, data, encoding: str = 'utf-8'):
+        with open(self.work_dir / rel, "w", encoding=encoding) as f:
+            toml.dump(data, f)
 
     def remove_file(
         self,

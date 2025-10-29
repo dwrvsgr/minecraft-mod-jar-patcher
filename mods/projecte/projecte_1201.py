@@ -17,6 +17,7 @@ class ProjectEPatcher_1201(JarPatcher):
         self.modify_emc()
         self.modify_lang()
         self.replace_textures()
+        self.modify_toml()
 
     def delete_recipes(self):
         rel = './data/projecte/recipes'
@@ -82,7 +83,25 @@ class ProjectEPatcher_1201(JarPatcher):
             f"emc.projecte.emc": f"%s {emc_name}",
             f"emc.projecte.tooltip": f"{emc_name}: %s",
             f"emc.projecte.tooltip.stack.with_sell": f"堆叠 {emc_name}: %s (%s)",
-            f"emc.projecte.tooltip.with_sell": f"{emc_name}: %s (%s)"
+            f"emc.projecte.tooltip.with_sell": f"{emc_name}: %s (%s)",
+            f"command.projecte.remove.success": f"成功移除 %s 的{emc_name}值.",
+            f"command.projecte.reset.success": f"成功修改\"%s\"的{emc_name}值。",
+            f"command.projecte.set.success": f"已将 %s 的{emc_name}值设为 %s.",
+            f"divining_rod.projecte.avg_emc": f"平均{emc_name}值为%s，共%s个方块",
+            f"divining_rod.projecte.max_emc": f"最高{emc_name}：%s",
+            f"divining_rod.projecte.second_max": f"第二高{emc_name}：%s",
+            f"divining_rod.projecte.third_max": f"第三高{emc_name}：%s",
+            f"emc.projecte.max_gen_rate": f"最高收集效率： %s {emc_name}/s",
+            f"emc.projecte.max_output_rate": f"最高输出效率： %s {emc_name}/s",
+            f"emc.projecte.max_storage": f"{emc_name}上限： %s {emc_name}",
+            f"emc.projecte.tooltip.stack": f"{emc_name}总和： %s",
+            f"emc.projecte.stored": f"{emc_name}存储： %s",
+            f"emc.projecte.too_much": f"{emc_name}已达到上限！",
+            f"tooltip.projecte.evertide.4": f"使用无需消耗{emc_name}！",
+            f"tooltip.projecte.volcanite.4": f"使用需消耗32 {emc_name}",
+            f"advancements.projecte.klein_star": f"{emc_name} 电池!",
+            f"advancements.projecte.klein_star.description": f"储存{emc_name}以备不时之需!",
+            f"advancements.projecte.klein_star_big": f"大容量的{emc_name}电池",
         }
 
         other_keys = {
@@ -112,3 +131,10 @@ class ProjectEPatcher_1201(JarPatcher):
 
         shutil.copy2(BASE_DIR / 'transmute.png', self.work_dir / './assets/projecte/textures/gui/transmute.png')
 
+    def modify_toml(self):
+        toml_path = './META-INF/mods.toml'
+        toml_data = self.read_toml(toml_path)
+        toml_data["mods"][0]["displayName"] = "等价交换 (交易版)"
+        toml_data["mods"][0]["authors"] = "SinKillerJ, MaPePeR, williewillus, Lilylicious, pupnewfster, dongwen"
+        toml_data["mods"][0]["description"] = "Transaction Edition of ProjectE, modified by dongwen."
+        self.write_toml(toml_path, toml_data)
