@@ -68,8 +68,52 @@ class ProjectEPatcher_1211(JarPatcher):
         with open(BASE_DIR / 'emc_data.json5', 'r', encoding='utf-8') as f:
             new_emc_data = json5.load(f)
 
-        # TODO: 不同的EMC修改逻辑
+        """
+        1.21.1 中的data['values']['before'] 不再是一个Dict[str, Any]，而是一个List[Dict[str, Any]]，长度为209，相比1.20.1多了14个。
+
+        经统计：
+            - type一共只有3种：{'projecte:fluid', 'projecte:fake', 'projecte:item'}，其中前2种只出现1次，最后一种出现207次。
+            - 统计List中每个Dict的keys组合的出现频率：
+                ① ('type', 'description', 'emc_value'): 1
+                ② ('type', 'emc_value', 'tag'): 27
+                ③ ('type', 'emc_value', 'id'): 173
+                ④ ('type', 'data', 'emc_value', 'id'): 8
         
+        分析：
+            - ① 和 ④需要原样保留，对于② 和 ③，先将其压缩为一个Dict，与new_emc_data合并后再进行还原
+        """
+
+        result = []
+        org_emc_data = {}
+        for item in default_emc_data['values']['before']:
+            if 'data' in item or 'description' in item:
+                result.append(item)
+            else:
+                if 'id' in item:
+                    org_emc_data[item['id']] = item['emc_value']
+                else:
+                    # 不考虑绿宝石标签
+                    if item['tag'] == 'c:gems/emerald':
+                        continue
+                    org_emc_data[f"#{item['tag']}"] = item['emc_value']
+        
+        """ 原版物品 """
+        for k, v in new_emc_data['vanilla'].items():
+            org_emc_data[k] = v
+        
+        """ 农夫乐事模组 """
+        for k, v in new_emc_data['farmersdelight'].items():
+            org_emc_data[k] = v
+
+        for k, v in org_emc_data.items():
+            base = {'type': 'projecte:item', 'emc_value': v}
+            if k.startswith('#'):
+                base['tag'] = k[1:]
+            else:
+                base['id'] = k
+            result.append(base)
+        
+        default_emc_data['values']['before'] = result
 
         self.write_json(default_emc_path, default_emc_data)
 
@@ -121,6 +165,8 @@ class ProjectEPatcher_1211(JarPatcher):
             "transmutation.projecte.transmute": "交易台",
             "advancements.projecte.transmutation_table": "交易物品！",
             "advancements.projecte.transmutation_tablet": "更先进的交易！",
+            "fml.menu.mods.info.description.projecte": "Transaction Edition of ProjectE, modified by dongwen.",
+            "fml.menu.mods.info.displayname.projecte": "等价交换（交易版）",
         }
 
         with open(BASE_DIR / 'remain+i18n.json', 'r', encoding='utf-8') as f:
