@@ -199,6 +199,54 @@ class JarPatcher(ABC):
         with open(self.work_dir / rel, "w", encoding=encoding) as f:
             toml.dump(data, f)
 
+    def read_lang(self, rel: PathLike, encoding: str = 'utf-8') -> Dict[str, str]:
+        """从工作目录读取 .lang 格式的语言文件。
+
+        .lang 文件是 Minecraft 模组常用的语言文件格式，使用键值对形式存储翻译。
+        
+        Args:
+            rel: 相对于工作目录的文件路径。可为字符串或 pathlib.Path 对象。
+            encoding: 文件编码格式，默认为 'utf-8'。
+            
+        Returns:
+            包含键值对的字典。注释行和空行会被忽略。
+            
+        Raises:
+            FileNotFoundError: 当指定的文件不存在时。
+        """
+        lang_path = self.work_dir / rel
+        lang_dict = {}
+        with open(lang_path, 'r', encoding=encoding) as f:
+            for line in f:
+                line = line.strip()
+                # 跳过空行和注释
+                if not line or line.startswith('#'):
+                    continue
+                # 解析键值对
+                if '=' in line:
+                    key, value = line.split('=', 1)
+                    lang_dict[key.strip()] = value.strip()
+        return lang_dict
+
+    def write_lang(self, rel: PathLike, lang_dict: Dict[str, str], encoding: str = 'utf-8') -> None:
+        """将数据写入工作目录的 .lang 格式的语言文件。
+        
+        Args:
+            rel: 相对于工作目录的文件路径。可为字符串或 pathlib.Path 对象。
+            lang_dict: 包含键值对的字典。
+            encoding: 文件编码格式，默认为 'utf-8'。
+            
+        注意：
+            文件会被完全覆盖，不会保留原始文件的注释和空行。
+            键值对会按字母顺序排序后写入。
+        """
+        lang_path = self.work_dir / rel
+        
+        # 直接写入所有键值对，按字母顺序排序
+        with open(lang_path, 'w', encoding=encoding) as f:
+            for key, value in sorted(lang_dict.items()):
+                f.write(f"{key}={value}\n")
+
     def remove_file(
         self,
         rel: PathLike,

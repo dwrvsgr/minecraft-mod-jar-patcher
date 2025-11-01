@@ -27,6 +27,11 @@ META: dict[str, dict[str, tuple[str, type]]] = {
             "848dc3a796f9723c49e14bf374b2ba58",
             ProjectEPatcher_1201
         ),
+        # Minecraft 1.12.2
+        "ProjectE-1.12.2-PE1.4.1.jar": (
+            "4601ba2741f192bcd01d132aa3e219b5",
+            ProjectEPatcher_1122
+        ),
     },
     "immersive_aircraft": {
         "immersive_aircraft-1.4.0+1.20.1-forge.jar": (

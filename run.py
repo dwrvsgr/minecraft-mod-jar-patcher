@@ -29,7 +29,7 @@ class Args(BaseSettings):
     )
     
     jar_path: str = Field(
-        default='~/Downloads/ProjectE-1.21.1-PE1.1.0.jar',
+        default='~/Downloads/ProjectE-1.12.2-PE1.4.1.jar',
         description="MOD 文件路径（支持 ~ 展开为用户主目录）"
     )
     
