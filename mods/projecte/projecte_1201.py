@@ -1,14 +1,3 @@
-"""等价交换模组补丁器（适用于 Minecraft 1.20.1、1.19.2、1.18.2、1.16.5）。
-
-此模块提供了 ProjectEPatcher_1201 类，用于修改等价交换（ProjectE）模组的 JAR 文件。
-主要修改内容包括：
-- 删除部分配方、战利品表和进度
-- 修改合成配方（交易台和交易终端）
-- 修改 EMC 值（等价交换值）配置
-- 更新中文语言文件（将 EMC 替换为 Coins）
-- 修改模组元数据（mods.toml）
-- 替换材质纹理
-"""
 from ..patcher import JarPatcher
 import json5
 from pathlib import Path

@@ -1,19 +1,3 @@
-"""等价交换模组补丁器（适用于 Minecraft 1.21.1）。
-
-此模块提供了 ProjectEPatcher_1211 类，用于修改等价交换（ProjectE）模组的 JAR 文件。
-与 1.20.1 版本的主要区别在于：
-- EMC 数据结构的处理方式不同（1.21.1 使用列表格式）
-- 进度和配方目录名称不同（advancement/recipe vs advancements/recipes）
-- 模组元数据文件路径不同（neoforge.mods.toml vs mods.toml）
-
-主要修改内容包括：
-- 删除部分配方、战利品表和进度
-- 修改合成配方（交易台和交易终端）
-- 修改 EMC 值（等价交换值）配置
-- 更新中文语言文件（将 EMC 替换为 Coins）
-- 修改模组元数据（neoforge.mods.toml）
-- 替换材质纹理
-"""
 from ..patcher import JarPatcher
 import json5
 from pathlib import Path

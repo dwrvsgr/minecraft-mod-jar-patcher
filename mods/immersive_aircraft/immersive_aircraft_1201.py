@@ -1,10 +1,3 @@
-"""沉浸式飞机模组补丁器（适用于 Minecraft 1.20.1）。
-
-此模块提供了 ImmersiveAircraftPatcher_1201 类，用于修改沉浸式飞机模组的 JAR 文件。
-主要修改内容包括：
-- 调整各种飞机部件的合成配方（使用原版材料替换模组特有材料）
-- 更新中文语言文件中的模组名称
-"""
 from ..patcher import JarPatcher
 from pathlib import Path
 
