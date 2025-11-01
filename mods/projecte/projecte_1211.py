@@ -1,4 +1,4 @@
-from patcher import JarPatcher
+from ..patcher import JarPatcher
 import json5
 from pathlib import Path
 import json
@@ -65,8 +65,11 @@ class ProjectEPatcher_1211(JarPatcher):
         default_emc_path = './data/projecte/pe_custom_conversions/defaults.json'
         default_emc_data = self.read_json(default_emc_path)
 
-        with open(BASE_DIR / 'emc_data.json5', 'r', encoding='utf-8') as f:
-            new_emc_data = json5.load(f)
+        emc_data_dir = BASE_DIR / 'emc_data'
+        with open(emc_data_dir / 'vanilla.json5', 'r', encoding='utf-8') as f:
+            vanilla_data = json5.load(f)
+        with open(emc_data_dir / 'farmersdelight.json5', 'r', encoding='utf-8') as f:
+            farmersdelight_data = json5.load(f)
 
         """
         1.21.1 中的data['values']['before'] 不再是一个Dict[str, Any]，而是一个List[Dict[str, Any]]，长度为209，相比1.20.1多了14个。
@@ -98,11 +101,11 @@ class ProjectEPatcher_1211(JarPatcher):
                     org_emc_data[f"#{item['tag']}"] = item['emc_value']
         
         """ 原版物品 """
-        for k, v in new_emc_data['vanilla'].items():
+        for k, v in vanilla_data.items():
             org_emc_data[k] = v
         
         """ 农夫乐事模组 """
-        for k, v in new_emc_data['farmersdelight'].items():
+        for k, v in farmersdelight_data.items():
             org_emc_data[k] = v
 
         for k, v in org_emc_data.items():

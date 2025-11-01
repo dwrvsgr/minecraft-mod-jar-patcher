@@ -1,0 +1,13 @@
+{
+  // 原版物品
+  "minecraft:emerald": 160, // 绿宝石（20%的交易可获利）
+  // 绿宝石的EMC不可以在这里设为0，否则会导致所有物品都失去EMC
+  // 如果执意要改为0，请在custom_emc.json中修改
+  "minecraft:gilded_blackstone": 48, // 镶金黑石
+  "minecraft:wither_skeleton_skull": 10240, // 凋零骷髅头
+  "minecraft:dragon_head": 32768, // 龙首
+  "minecraft:elytra": 65536, // 鞘翅
+  "minecraft:totem_of_undying": 8192, // 不死图腾
+  "minecraft:experience_bottle": 512, // 附魔之瓶
+}
+

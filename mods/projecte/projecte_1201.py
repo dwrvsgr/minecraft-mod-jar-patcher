@@ -1,4 +1,4 @@
-from patcher import JarPatcher
+from ..patcher import JarPatcher
 import json5
 from pathlib import Path
 import json
@@ -65,18 +65,21 @@ class ProjectEPatcher_1201(JarPatcher):
         default_emc_path = './data/projecte/pe_custom_conversions/defaults.json'
         default_emc_data = self.read_json(default_emc_path)
 
-        with open(BASE_DIR / 'emc_data.json5', 'r', encoding='utf-8') as f:
-            new_emc_data = json5.load(f)
+        emc_data_dir = BASE_DIR / 'emc_data'
+        with open(emc_data_dir / 'vanilla.json5', 'r', encoding='utf-8') as f:
+            vanilla_data = json5.load(f)
+        with open(emc_data_dir / 'farmersdelight.json5', 'r', encoding='utf-8') as f:
+            farmersdelight_data = json5.load(f)
 
         # 删除绿宝石标签
         del default_emc_data['values']['before']['#forge:gems/emerald']
 
         """ 原版物品 """
-        for k, v in new_emc_data['vanilla'].items():
+        for k, v in vanilla_data.items():
             default_emc_data['values']['before'][k] = v
         
         """ 农夫乐事模组 """
-        for k, v in new_emc_data['farmersdelight'].items():
+        for k, v in farmersdelight_data.items():
             default_emc_data['values']['before'][k] = v
 
         self.write_json(default_emc_path, default_emc_data)
