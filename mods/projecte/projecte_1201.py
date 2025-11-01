@@ -1,3 +1,14 @@
+"""等价交换模组补丁器（适用于 Minecraft 1.20.1、1.19.2、1.18.2、1.16.5）。
+
+此模块提供了 ProjectEPatcher_1201 类，用于修改等价交换（ProjectE）模组的 JAR 文件。
+主要修改内容包括：
+- 删除部分配方、战利品表和进度
+- 修改合成配方（交易台和交易终端）
+- 修改 EMC 值（等价交换值）配置
+- 更新中文语言文件（将 EMC 替换为 Coins）
+- 修改模组元数据（mods.toml）
+- 替换材质纹理
+"""
 from ..patcher import JarPatcher
 import json5
 from pathlib import Path
@@ -9,25 +20,42 @@ BASE_DIR = Path(__file__).resolve().parent
 
 
 class ProjectEPatcher_1201(JarPatcher):
-    """ 
-    支持的版本：1.20.1 1.19.2 1.18.2 1.16.5
+    """等价交换模组补丁器（Minecraft 1.20.1、1.19.2、1.18.2、1.16.5 版本）。
+    
+    此类继承自 JarPatcher，用于修改等价交换模组的 JAR 文件。
+    主要功能包括删除、修改和替换模组中的各种资源文件。
+    
+    支持的 Minecraft 版本：1.20.1、1.19.2、1.18.2、1.16.5
     """
+    
     def run(self):
-        # 删除
+        """执行补丁流程。
+        
+        按顺序执行删除、修改和替换操作来完成对模组的修改。
+        """
+        # 删除操作
         self.delete_recipes()
         self.delete_loot_tables()
         self.delete_advancements()
 
-        # 修改
+        # 修改操作
         self.modify_recipes()
         self.modify_emc()
         self.modify_lang()
         self.modify_toml()
 
-        # 替换
+        # 替换操作
         self.replace_textures()
 
     def delete_advancements(self):
+        """删除进度文件。
+        
+        删除所有进度文件，但保留以下文件：
+        - transmutation_table.json
+        - transmutation_tablet.json
+        
+        同时删除 recipes 子目录及其所有内容。
+        """
         rel = './data/projecte/advancements'
         keep = ['transmutation_table.json', 'transmutation_tablet.json']
         self.remove_file(rel, keep=keep)
@@ -35,59 +63,93 @@ class ProjectEPatcher_1201(JarPatcher):
         self.remove_dir('./data/projecte/advancements/recipes')
 
     def delete_recipes(self):
+        """删除配方文件。
+        
+        删除所有配方文件，但保留以下文件：
+        - transmutation_table.json
+        - transmutation_tablet.json
+        """
         rel = './data/projecte/recipes'
         keep = ['transmutation_table.json', 'transmutation_tablet.json']
         self.remove_file(rel, keep=keep)
 
     def delete_loot_tables(self):
+        """删除战利品表文件。
+        
+        删除 blocks 目录下的所有战利品表文件，但保留 transmutation_table.json。
+        """
         rel = './data/projecte/loot_tables/blocks'
         keep = ['transmutation_table.json']
         self.remove_file(rel, keep=keep)
 
     def modify_recipes(self):
+        """修改合成配方。
+        
+        修改以下配方：
+        - 交易终端：将 "D" 键替换为下界合金块
+        - 交易台：将 "P" 键替换为钻石
+        
+        删除 conversions 子目录及其所有内容。
+        """
         self.modify_recipe(
             recipe_path='./data/projecte/recipes/transmutation_tablet.json',
-            keys_to_update={
-                "D": "minecraft:netherite_block"
-            }
+            keys_to_update={"D": "minecraft:netherite_block"}
         )
 
         self.modify_recipe(
             recipe_path='./data/projecte/recipes/transmutation_table.json',
-            keys_to_update={
-                "P": "minecraft:diamond"
-            }
+            keys_to_update={"P": "minecraft:diamond"}
         )
 
         self.remove_dir('./data/projecte/recipes/conversions')
 
     def modify_emc(self):
+        """修改 EMC（等价交换值）配置。
+        
+        从外部 JSON5 文件加载自定义的 EMC 值，并合并到模组的默认 EMC 配置中。
+        具体操作：
+        1. 删除绿宝石标签的 EMC 值
+        2. 合并原版物品的 EMC 值（从 vanilla.json5）
+        3. 合并农夫乐事模组物品的 EMC 值（从 farmersdelight.json5）
+        """
         default_emc_path = './data/projecte/pe_custom_conversions/defaults.json'
         default_emc_data = self.read_json(default_emc_path)
 
         emc_data_dir = BASE_DIR / 'emc_data'
+        # 加载原版物品的 EMC 数据
         with open(emc_data_dir / 'vanilla.json5', 'r', encoding='utf-8') as f:
             vanilla_data = json5.load(f)
+        # 加载农夫乐事模组的 EMC 数据
         with open(emc_data_dir / 'farmersdelight.json5', 'r', encoding='utf-8') as f:
             farmersdelight_data = json5.load(f)
 
-        # 删除绿宝石标签
+        # 删除绿宝石标签的 EMC 值
         del default_emc_data['values']['before']['#forge:gems/emerald']
 
-        """ 原版物品 """
+        # 合并原版物品的 EMC 值
         for k, v in vanilla_data.items():
             default_emc_data['values']['before'][k] = v
         
-        """ 农夫乐事模组 """
+        # 合并农夫乐事模组物品的 EMC 值
         for k, v in farmersdelight_data.items():
             default_emc_data['values']['before'][k] = v
 
         self.write_json(default_emc_path, default_emc_data)
 
     def modify_lang(self):
-        emc_name = "Coins"  # 或credit
+        """修改中文语言文件。
+        
+        将所有与 EMC 相关的文本替换为 "Coins"（硬币），并添加其他自定义翻译。
+        合并以下来源的翻译键：
+        1. 原始语言文件
+        2. 保留的翻译（remain+i18n.json）
+        3. EMC 相关的翻译键（替换为 Coins）
+        4. 其他自定义翻译键
+        """
+        emc_name = "Coins"  # EMC 的新名称，也可以使用 "credit"
         lang_path = './assets/projecte/lang/zh_cn.json'
         
+        # EMC 相关的翻译键，将 EMC 替换为 Coins
         emc_keys = {
             f"command.projecte.dump_missing_emc.multiple_missing": f"%s 物品缺少{emc_name}值，打印到服务器日志。",
             f"command.projecte.dump_missing_emc.none_missing": f"所有物品都有一个{emc_name}值。",
@@ -125,6 +187,7 @@ class ProjectEPatcher_1201(JarPatcher):
             f"advancements.projecte.klein_star_big": f"大容量的{emc_name}电池",
         }
 
+        # 其他自定义翻译键
         other_keys = {
             "block.projecte.transmutation_table": "交易台",
             "item.projecte.transmutation_tablet": "交易终端",
@@ -134,25 +197,44 @@ class ProjectEPatcher_1201(JarPatcher):
             "advancements.projecte.transmutation_tablet": "更先进的交易！",
         }
 
+        # 加载保留的翻译键
         with open(BASE_DIR / 'remain+i18n.json', 'r', encoding='utf-8') as f:
             remain_keys = json.load(f)
 
+        # 合并所有翻译键（使用字典合并，后面的键会覆盖前面的同名键）
         org_keys = self.read_json(lang_path)
         total_keys = org_keys | remain_keys | emc_keys | other_keys
         
         self.write_json(lang_path, total_keys)
 
     def replace_textures(self):
-        # 替换转化桌材质
-        p = self.work_dir / './assets/projecte/textures/item/transmutation_tablet.png'
-        p2 = self.work_dir / './assets/projecte/textures/block/transmutation_stone/top.png'
-        painter = TransmutationTabletPainter('v7', p)
-        painter.paint(p)
-        painter.paint(p2)
+        """替换材质纹理文件。
+        
+        使用 TransmutationTabletPainter 重新绘制以下纹理：
+        - 交易终端的物品纹理
+        - 交易台的方块顶部纹理
+        
+        同时复制自定义的 GUI 纹理文件。
+        """
+        # 交易终端的物品纹理和交易台的方块顶部纹理
+        tablet_item_path = self.work_dir / './assets/projecte/textures/item/transmutation_tablet.png'
+        table_top_path = self.work_dir / './assets/projecte/textures/block/transmutation_stone/top.png'
+        
+        painter = TransmutationTabletPainter('v7', tablet_item_path)
+        painter.paint(tablet_item_path)
+        painter.paint(table_top_path)
 
-        shutil.copy2(BASE_DIR / 'transmute.png', self.work_dir / './assets/projecte/textures/gui/transmute.png')
+        # 复制自定义的 GUI 纹理
+        shutil.copy2(
+            BASE_DIR / 'transmute.png',
+            self.work_dir / './assets/projecte/textures/gui/transmute.png'
+        )
 
     def modify_toml(self):
+        """修改模组元数据文件（mods.toml）。
+        
+        更新模组的显示名称、作者列表和描述信息。
+        """
         toml_path = './META-INF/mods.toml'
         toml_data = self.read_toml(toml_path)
         toml_data["mods"][0]["displayName"] = "等价交换 (交易版)"
